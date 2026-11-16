@@ -1,13 +1,14 @@
 import { useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import {
-  Alert, Box, Button, Card, CardContent, Stack, TextField, Typography,
+  Alert, Box, Button, Card, CardContent, Link, Stack, TextField, Typography,
 } from "@mui/material";
 import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Login() {
   const { login } = useAuth();
-  const [email, setEmail] = useState("emilys");
-  const [password, setPassword] = useState("emilyspass");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -48,10 +49,6 @@ export default function Login() {
 
             {error && <Alert severity="error">{error}</Alert>}
 
-            <Alert severity="info" sx={{ py: 0.5 }}>
-              Demo account is pre-filled: <strong>emilys</strong> / <strong>emilyspass</strong>
-            </Alert>
-
             <Box>
               <Typography component="label" htmlFor="login-email" sx={{ display: "block", mb: 0.75, fontWeight: 600 }}>
                 Username or email
@@ -59,7 +56,7 @@ export default function Login() {
               <TextField
                 id="login-email"
                 type="text"
-                placeholder="emilys"
+                placeholder="you@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoFocus
@@ -85,6 +82,13 @@ export default function Login() {
             <Button type="submit" variant="contained" size="large" disabled={busy} sx={{ height: 48 }}>
               {busy ? "Logging in…" : "Login"}
             </Button>
+
+            <Typography variant="body2" color="text.secondary" textAlign="center">
+              Don&apos;t have an account?{" "}
+              <Link component={RouterLink} to="/register" fontWeight={700}>
+                Register
+              </Link>
+            </Typography>
           </Stack>
         </CardContent>
       </Card>

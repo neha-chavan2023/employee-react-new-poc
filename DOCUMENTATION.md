@@ -138,10 +138,20 @@ Derived values used by the Dashboard:
 
 ### 7.1 Login — `src/pages/Login.jsx`
 - Centered card on a plain light background; "Username or email" + Password fields and a full-width "Login" button.
-- The first field accepts a username or an email, and is **pre-filled** with the demo account `emilys` / `emilyspass` so the app can be demoed in one click (**any valid dummyjson user works**). An info alert above the form states the same credentials.
+- The first field accepts **either a username or an email** and is **empty on load** — nothing is pre-filled or remembered between visits. Users sign in with an account they registered, or with a dummyjson demo account such as `emilys` / `emilyspass`.
 - Calls `POST /auth/login`, then stores `id, username, name, email, image, token` in `localStorage` under `emp_poc_auth`.
+- Local accounts registered in the browser are checked first (hashed password comparison), and dummyjson is only called if no local account matches the username/email.
 - Shows an inline error alert on failure, disables the button and shows "Logging in…" while pending.
+- Links to `/register` via "Don't have an account? Register".
 - If already signed in, `/login` redirects to `/`.
+
+### 7.1.1 Register — `src/pages/Register.jsx`
+- Same card design as Login, but **all fields start empty** (the demo pre-fill is a login-page convenience only).
+- Fields: full name, username, email, password, confirm password. Password must be ≥ 6 characters and match the confirmation.
+- Rejects a duplicate username or email (case-insensitive).
+- The account is appended to `localStorage` under `emp_poc_accounts` as `{ id, name, username, email, passwordHash, createdAt }`, where `passwordHash` is a SHA-256 digest — the plain password is never stored.
+- On success the user is signed in immediately and lands on the dashboard; the session uses `token: "local-session"` and an empty avatar, which `Layout` renders as initials.
+- This is a browser-local demo account, not a server account: it works only in the browser that created it. See §10.
 
 ### 7.2 Layout — `src/components/Layout.jsx`
 - Permanent 264px drawer on desktop; temporary drawer behind a hamburger below the `md` breakpoint.
@@ -243,7 +253,7 @@ npm run preview  # serve the built bundle
 
 **Demo script for the TL (≈3 minutes):**
 
-1. Open the app → redirected to `/login`; credentials are already filled in → click **Login**.
+1. Open the app → redirected to `/login`. Register a fresh account (which signs you in), or use the demo user `emilys` / `emilyspass`.
 2. Dashboard: read out the two KPIs. On the chart, say that bars are sorted by headcount (leftmost = largest team) and hover one to show the tooltip.
 3. Employees: search "emily", filter by a department, sort by age, page to page 2.
 4. Add employee with a name/department that does not exist → appears at the top of the list and in the department dropdown. **Then go back to the Dashboard: its bar has grown by one and has possibly changed position** (live derivation, §7.3.1).
@@ -266,7 +276,7 @@ These are honest limitations of the POC as it currently stands:
 4. **No real authorization.** The access token is stored but never sent on requests; there is no expiry handling and no server-side enforcement. Route protection is purely client-side.
 5. **Sensitive data in `localStorage`.** Employee PII and a token are persisted in plain text, readable by any script on the origin.
 6. **No automated tests, linting, or CI.** `eslint-disable` comments exist for a linter that is not installed. Build is the only gate.
-7. **Single-browser data.** Because persistence is local, two users/browsers see different data; there is no shared source of truth.
+7. **Single-browser data.** Because persistence is local, two users/browsers see different data; there is no shared source of truth. Registered accounts (`emp_poc_accounts`) have the same limitation: they exist only in that browser and cannot log in on another device.
 8. **No server-side pagination/search/sort.** Everything is client-side over 208 records — fine for a demo, not for a real headcount.
 9. **Hard-coded API base URL.** No `.env` support; cannot point at staging vs production without editing code.
 10. **Large initial bundle** (~902 kB / 270 kB gzip, Vite warns over 500 kB) — no route-level code splitting.
