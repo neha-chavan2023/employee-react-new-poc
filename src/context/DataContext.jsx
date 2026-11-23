@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import * as api from "../api.js";
 import { useAuth } from "./AuthContext.jsx";
+import { validateEmployee } from "../utils/validation.js";
 
 const DataContext = createContext(null);
 const EMP_KEY = "emp_poc_employees";
@@ -63,17 +64,25 @@ export function DataProvider({ children }) {
 
   /* ---------------- Employee CRUD ---------------- */
   const addEmployee = useCallback(async (emp) => {
+    const validationError = validateEmployee(emp, departments);
+    if (validationError) throw new Error(validationError);
+
     await api.addUser(emp);
     setEmployees((list) => {
       const nextId = Math.max(208, ...list.map((e) => e.id)) + 1;
       return [{ ...emp, id: nextId, image: `https://i.pravatar.cc/100?u=${nextId}` }, ...list];
     });
-  }, []);
+  }, [departments]);
 
   const updateEmployee = useCallback(async (id, changes) => {
+    const employee = employees.find((item) => item.id === id);
+    if (!employee) throw new Error("Employee not found.");
+    const validationError = validateEmployee({ ...employee, ...changes }, departments, false);
+    if (validationError) throw new Error(validationError);
+
     await api.updateUser(id, changes);
     setEmployees((list) => list.map((e) => (e.id === id ? { ...e, ...changes } : e)));
-  }, []);
+  }, [departments, employees]);
 
   const deleteEmployee = useCallback(async (id) => {
     await api.deleteUser(id);

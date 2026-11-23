@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import * as api from "../api.js";
+import { validateRegistration } from "../utils/validation.js";
 
 const AuthContext = createContext(null);
 const KEY = "emp_poc_auth";
@@ -40,6 +41,9 @@ export function AuthProvider({ children }) {
   };
 
   const register = async ({ name, username, email, password }) => {
+    const validationError = validateRegistration({ name, username, email, password });
+    if (validationError) throw new Error(validationError);
+
     const accounts = readAccounts();
     const uname = username.trim();
     const mail = email.trim();

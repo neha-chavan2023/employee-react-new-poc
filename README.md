@@ -18,4 +18,10 @@ npm run build    # production build
 ## Notes
 - dummyjson **simulates** add/update/delete (returns a response but does not persist). The app calls the API, then applies the change to local state, saved in localStorage so changes survive refresh.
 - To reload fresh data from the API, clear the localStorage keys starting with `emp_poc_` (DevTools > Application) and refresh.
-- Structure: `src/api.js` (HTTP), `src/context/` (auth + data state), `src/pages/` (screens), `src/components/` (layout, modal).
+- Structure:
+  - `src/pages/` contains the route-level screens.
+  - `src/components/` contains shared UI: the app layout, reusable modal, and employee form.
+  - `src/context/` holds shared authentication and employee/department state.
+  - `src/utils/validation.js` contains form rules reused by the UI and state providers.
+  - `src/api.js` contains the HTTP calls.
+- Validation is checked in the forms for immediate feedback and again by the auth/data providers before saving.

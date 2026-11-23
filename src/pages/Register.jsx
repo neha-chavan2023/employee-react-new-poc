@@ -4,6 +4,7 @@ import {
   Alert, Box, Button, Card, CardContent, Link, Stack, TextField, Typography,
 } from "@mui/material";
 import { useAuth } from "../context/AuthContext.jsx";
+import { validateRegistration } from "../utils/validation.js";
 
 const empty = {
   name: "",
@@ -25,8 +26,9 @@ export default function Register() {
   const submit = async (e) => {
     e.preventDefault();
     setError("");
-    if (form.password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    const validationError = validateRegistration(form);
+    if (validationError) {
+      setError(validationError);
       return;
     }
     if (form.password !== form.confirm) {

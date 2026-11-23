@@ -12,7 +12,7 @@ function Protected({ children }) {
   return user ? children : <Navigate to="/login" replace />;
 }
 
-export default function xApp() {
+export default function App() {
   const { user } = useAuth();
   return (
     <Routes>

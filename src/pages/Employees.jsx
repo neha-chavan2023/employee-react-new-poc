@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  Alert, Avatar, Box, Button, Chip, DialogActions, DialogContent, Grid,
+  Alert, Avatar, Box, Button, Chip, DialogActions, DialogContent,
   IconButton, MenuItem, Pagination, Paper, Stack, Table, TableBody,
   TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField,
   Tooltip, Typography,
@@ -11,64 +11,9 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { useData } from "../context/DataContext.jsx";
 import Modal from "../components/Modal.jsx";
+import EmployeeForm, { EMPTY_EMPLOYEE } from "../components/EmployeeForm.jsx";
 
 const PAGE_SIZE = 10;
-const EMPTY = {
-  firstName: "", lastName: "", email: "", phone: "",
-  age: 30, gender: "male", department: "", title: "", city: "",
-};
-
-function EmployeeForm({ initial, departments, onSubmit, onCancel }) {
-  const [form, setForm] = useState(initial);
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-  const set = (key) => (event) => setForm({ ...form, [key]: event.target.value });
-
-  const submit = async (event) => {
-    event.preventDefault();
-    setBusy(true);
-    setError("");
-    try {
-      await onSubmit({ ...form, age: Number(form.age) });
-    } catch (err) {
-      setError(err.message);
-      setBusy(false);
-    }
-  };
-
-  return (
-    <Box component="form" onSubmit={submit}>
-      <DialogContent dividers>
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 6 }}><TextField label="First name" value={form.firstName} onChange={set("firstName")} required fullWidth /></Grid>
-          <Grid size={{ xs: 12, sm: 6 }}><TextField label="Last name" value={form.lastName} onChange={set("lastName")} required fullWidth /></Grid>
-          <Grid size={{ xs: 12, sm: 6 }}><TextField label="Email" type="email" value={form.email} onChange={set("email")} required fullWidth /></Grid>
-          <Grid size={{ xs: 12, sm: 6 }}><TextField label="Phone" value={form.phone} onChange={set("phone")} fullWidth /></Grid>
-          <Grid size={{ xs: 12, sm: 6 }}><TextField label="Age" type="number" slotProps={{ htmlInput: { min: 18, max: 70 } }} value={form.age} onChange={set("age")} required fullWidth /></Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField select label="Gender" value={form.gender} onChange={set("gender")} fullWidth>
-              <MenuItem value="male">Male</MenuItem>
-              <MenuItem value="female">Female</MenuItem>
-            </TextField>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField select label="Department" value={form.department} onChange={set("department")} required fullWidth>
-              {!form.department && <MenuItem value="" disabled>Select department</MenuItem>}
-              {departments.map((department) => <MenuItem key={department} value={department}>{department}</MenuItem>)}
-            </TextField>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}><TextField label="Job title" value={form.title} onChange={set("title")} fullWidth /></Grid>
-          <Grid size={12}><TextField label="City" value={form.city} onChange={set("city")} fullWidth /></Grid>
-          {error && <Grid size={12}><Alert severity="error">{error}</Alert></Grid>}
-        </Grid>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, py: 2 }}>
-        <Button onClick={onCancel} color="inherit">Cancel</Button>
-        <Button type="submit" variant="contained" disabled={busy}>{busy ? "Saving…" : "Save employee"}</Button>
-      </DialogActions>
-    </Box>
-  );
-}
 
 export default function Employees() {
   const { employees, departments, addEmployee, updateEmployee, deleteEmployee } = useData();
@@ -232,8 +177,9 @@ export default function Employees() {
       {editing && (
         <Modal title={editing === "new" ? "Add employee" : "Edit employee"} onClose={() => setEditing(null)}>
           <EmployeeForm
-            initial={editing === "new" ? { ...EMPTY, department: departments[0] || "" } : editing}
+            initial={editing === "new" ? { ...EMPTY_EMPLOYEE, department: departments[0] || "" } : editing}
             departments={departments}
+            validatePhone={editing === "new"}
             onSubmit={save}
             onCancel={() => setEditing(null)}
           />
